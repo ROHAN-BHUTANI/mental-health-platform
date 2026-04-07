@@ -1,3 +1,7 @@
+import os
+
+os.environ["ML_FAST_MODE"] = "1"
+
 from app.main import app
 
 def test_home():

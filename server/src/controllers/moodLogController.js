@@ -14,8 +14,13 @@ exports.logMood = async (req, res) => {
     const stressNum = Number(stress);
     const sleepNum = Number(sleep);
     const dateVal = date ? new Date(date) : new Date();
-    const dateKey = new Date(dateVal);
-    dateKey.setHours(0, 0, 0, 0); // normalize to start of day for upsert
+
+    // If date is provided as YYYY-MM-DD, preserve the selected day but stamp current time
+    // so multiple logs on the same day are stored as separate entries.
+    if (typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      const now = new Date();
+      dateVal.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+    }
 
     const isValidRange = (val, min, max) =>
       Number.isFinite(val) && val >= min && val <= max;
@@ -30,20 +35,19 @@ exports.logMood = async (req, res) => {
       return fail(res, 400, "sleep must be 0-24 hours");
     }
 
-    const doc = await MoodLog.findOneAndUpdate(
-      { userId, date: dateKey },
-      { userId, mood: moodNum, stress: stressNum, sleep: sleepNum, date: dateKey },
-      { upsert: true, new: true, setDefaultsOnInsert: true, runValidators: true }
-    );
+    const doc = await MoodLog.create({
+      userId,
+      mood: moodNum,
+      stress: stressNum,
+      sleep: sleepNum,
+      date: dateVal
+    });
 
     invalidateAnalyticsCache(userId);
 
     return ok(res, doc, 201);
   } catch (err) {
     console.error("logMood error:", err);
-    if (err.code === 11000) {
-      return fail(res, 409, "A log already exists for this date");
-    }
     return fail(res, 500, err.message);
   }
 };

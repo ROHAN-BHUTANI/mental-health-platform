@@ -73,14 +73,14 @@ exports.createMood = async (req, res) => {
       ...mlData
     });
 
-    // Compatibility layer: sync write into MoodLog, which is canonical for analytics.
-    const dateKey = new Date();
-    dateKey.setHours(0, 0, 0, 0);
-    await MoodLog.findOneAndUpdate(
-      { userId, date: dateKey },
-      { userId, mood, stress, sleep, date: dateKey },
-      { upsert: true, new: true, setDefaultsOnInsert: true, runValidators: true }
-    );
+    // Compatibility layer: append to MoodLog so each submission is preserved.
+    await MoodLog.create({
+      userId,
+      mood,
+      stress,
+      sleep,
+      date: new Date()
+    });
     invalidateAnalyticsCache(userId);
 
     return ok(res, moodEntry.toObject ? moodEntry.toObject() : moodEntry, 201);

@@ -41,13 +41,26 @@ function compareSeries(currentSeries, previousSeries) {
 function computeStreak(sortedDescendingLogs) {
   if (!sortedDescendingLogs.length) return 0;
 
-  let streak = 1;
-  let previousDate = new Date(sortedDescendingLogs[0].date);
-  previousDate.setHours(0, 0, 0, 0);
+  const uniqueDays = [];
+  const seen = new Set();
 
-  for (let index = 1; index < sortedDescendingLogs.length; index += 1) {
-    const currentDate = new Date(sortedDescendingLogs[index].date);
-    currentDate.setHours(0, 0, 0, 0);
+  sortedDescendingLogs.forEach((log) => {
+    const normalized = new Date(log.date);
+    normalized.setHours(0, 0, 0, 0);
+    const key = normalized.toISOString();
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueDays.push(normalized);
+    }
+  });
+
+  if (!uniqueDays.length) return 0;
+
+  let streak = 1;
+  let previousDate = uniqueDays[0];
+
+  for (let index = 1; index < uniqueDays.length; index += 1) {
+    const currentDate = uniqueDays[index];
     const diffDays = Math.round((previousDate - currentDate) / (1000 * 60 * 60 * 24));
 
     if (diffDays === 1) {

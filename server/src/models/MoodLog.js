@@ -36,7 +36,7 @@ const MoodLogSchema = new mongoose.Schema(
   }
 );
 
-// Ensure one log per user per date if desired; comment out if multiple per day are allowed
-MoodLogSchema.index({ userId: 1, date: 1 }, { unique: true });
+// Support multiple logs per day while keeping fast history queries.
+MoodLogSchema.index({ userId: 1, date: -1 });
 
 module.exports = mongoose.model("MoodLog", MoodLogSchema);

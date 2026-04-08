@@ -30,14 +30,23 @@ const allowedOrigins = Array.from(new Set([
   ...configuredOrigins
 ]));
 
+const isLocalDevelopmentOrigin = (origin) => {
+  if (!origin) {
+    return false;
+  }
+
+  return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
+};
+
 app.use(helmet());
 app.use(cors({
   origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    const isDevMode = process.env.NODE_ENV !== 'production';
+    if (!origin || allowedOrigins.includes(origin) || (isDevMode && isLocalDevelopmentOrigin(origin))) {
       return callback(null, true);
     }
 
-    return callback(new Error('Origin not allowed by CORS'));
+    return callback(new Error(`Origin not allowed by CORS: ${origin}`));
   },
   credentials: true
 }));

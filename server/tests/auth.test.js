@@ -11,11 +11,13 @@ beforeAll(async () => {
   // connect DB
   await require('../src/config/db')();
   app = require('../src/app');
-});
+}, 60000);
 
 afterAll(async () => {
   await mongoose.disconnect();
-  await mongod.stop();
+  if (mongod) {
+    await mongod.stop();
+  }
 });
 
 test('GET /api/health', async () => {

@@ -9,11 +9,13 @@ beforeAll(async () => {
   process.env.MONGO_URI = mongod.getUri();
   await require('../src/config/db')();
   app = require('../src/app');
-});
+}, 60000);
 
 afterAll(async () => {
   await mongoose.disconnect();
-  await mongod.stop();
+  if (mongod) {
+    await mongod.stop();
+  }
 });
 
 test('create and list mood entries (protected)', async () => {

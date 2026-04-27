@@ -45,7 +45,7 @@ test('create and list mood entries (protected)', async () => {
   const dailyLog = await request(app)
     .post('/api/mood/log')
     .set('Authorization', `Bearer ${token}`)
-    .send({ mood: 8, stress: 3, sleep: 7, date: '2030-01-01' });
+    .send({ moodScore: 8, stressScore: 3, sleepHours: 7, date: '2030-01-01' });
 
   expect(dailyLog.statusCode).toBe(201);
   expect(dailyLog.body.success).toBe(true);
@@ -60,7 +60,7 @@ test('create and list mood entries (protected)', async () => {
   const updatedLog = await request(app)
     .post('/api/mood/log')
     .set('Authorization', `Bearer ${token}`)
-    .send({ mood: 9, stress: 2, sleep: 8, date: '2030-01-02' });
+    .send({ moodScore: 9, stressScore: 2, sleepHours: 8, date: '2030-01-02' });
 
   expect(updatedLog.statusCode).toBe(201);
 

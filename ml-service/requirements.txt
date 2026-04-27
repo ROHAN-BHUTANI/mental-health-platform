@@ -1,0 +1,10 @@
+flask
+transformers
+torch
+numpy
+scikit-learn
+gunicorn
+pandas
+flask-cors
+python-dotenv
+
